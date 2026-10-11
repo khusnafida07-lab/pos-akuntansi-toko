@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Aplikasi POS & Akuntansi Toko - RBAC Multi-Role</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN for Analytics & Dashboard Graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom App CSS -->
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col font-sans">
+
+  <!-- ================= HALAMAN LOGIN FORMAL (AUTHENTICATION SCREEN) ================= -->
+  <div id="loginScreen" class="min-h-screen bg-gradient-to-br from-slate-900 via-sky-950 to-slate-900 flex items-center justify-center p-4 sm:p-6 md:p-8">
+    <div class="max-w-xl w-full">
+      
+      <!-- Brand & Header -->
+      <div class="text-center mb-6">
+        <div class="inline-flex w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 items-center justify-center text-white shadow-lg shadow-sky-500/20 mb-3">
+          <i class="fa-solid fa-cash-register text-2xl"></i>
+        </div>
+        <h1 class="text-2xl font-black text-white tracking-tight">SISTEM POS & AKUNTANSI TOKO</h1>
+        <p class="text-xs text-sky-200 mt-1 max-w-md mx-auto">Platform Terintegrasi Transaksi Kasir, Inventori Stok & Laporan Keuangan Berbasis RBAC</p>
+      </div>
+
+      <!-- Login Card -->
+      <div class="bg-white rounded-3xl shadow-2xl border border-slate-200/80 p-6 sm:p-8 backdrop-blur">
+        <div class="mb-5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-lock text-sky-600"></i> Masuk ke Sistem
+            </h2>
+            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> MySQL Aktif
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-1">Gunakan akun kredensial yang terdaftar untuk mengakses hak role operasional Anda.</p>
+        </div>
+
+        <!-- Alert Error -->
+        <div id="loginErrorAlert" class="hidden mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2.5 font-medium animate-fade-in">
+          <i class="fa-solid fa-circle-exclamation text-rose-500 text-sm flex-shrink-0"></i>
+          <span id="loginErrorMsg">Username atau kata sandi tidak sesuai.</span>
+        </div>
+
+        <!-- Form Login -->
+        <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+          <!-- 1. Input Teks Nama Pengguna / User -->
+          <div>
+            <label for="loginName" class="block text-xs font-bold text-slate-700 mb-1.5">
+              Nama Pengguna / User <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                <i class="fa-solid fa-user text-xs"></i>
+              </span>
+              <input 
+                id="loginName" 
+                type="text" 
+                placeholder="Ketik nama Anda (contoh: Khusna Mufida, Mutiara Putri Sayyidina, dll)..." 
+                value="Khusna Mufida"
+                required 
+                autocomplete="name"
+                class="w-full text-xs pl-9 pr-3.5 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition shadow-sm font-medium"
+              >
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">Nama yang diketikkan akan dicatat dan langsung menyapa di dasbor utama.</p>
+          </div>
+
+          <!-- 2. Elemen Dropdown Role (Pilihan 7 Peran Sistem) -->
+          <div>
+            <label for="loginRole" class="block text-xs font-bold text-slate-700 mb-1.5">
+              Peran / Role Sistem <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400 pointer-events-none">
+                <i class="fa-solid fa-shield-halved text-xs"></i>
+              </span>
+              <select 
+                id="loginRole" 
+                onchange="handleRoleChange()"
+                required 
+                class="w-full text-xs pl-9 pr-9 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition shadow-sm cursor-pointer appearance-none font-semibold text-slate-800"
+              >
+                <option value="Owner" selected>👑 Owner (Pemilik Toko)</option>
+                <option value="Kepala Toko">🏬 Kepala Toko (Supervisi & Otorisasi)</option>
+                <option value="Bagian Keuangan">💳 Bagian Keuangan (Likuiditas & Kas)</option>
+                <option value="Akunting">📊 Akunting (Jurnal & Laporan Keuangan)</option>
+                <option value="Kepala Gudang">📦 Kepala Gudang (Stok & Opname)</option>
+                <option value="Kasir">🛒 Kasir (POS Kasir Register)</option>
+                <option value="Sales">💼 Sales (Order Pelanggan)</option>
+              </select>
+              <span class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 pointer-events-none">
+                <i class="fa-solid fa-chevron-down text-xs"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- 3. Input Kata Sandi (Password) -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label for="loginPassword" class="block text-xs font-bold text-slate-700">
+                Kata Sandi (Password) <span class="text-rose-500">*</span>
+              </label>
+              <span class="text-[11px] text-slate-400">Default: password123</span>
+            </div>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                <i class="fa-solid fa-key text-xs"></i>
+              </span>
+              <input 
+                id="loginPassword" 
+                type="password" 
+                placeholder="Masukkan kata sandi..." 
+                value="password123"
+                required 
+                autocomplete="current-password"
+                class="w-full text-xs pl-9 pr-10 py-2.5 bg-slate-50 hover:bg-white focus:bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition shadow-sm"
+              >
+              <button 
+                type="button" 
+                onclick="togglePasswordVisibility()" 
+                class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-600 focus:outline-none"
+                title="Tampilkan / Sembunyikan Kata Sandi"
+              >
+                <i id="togglePwdIcon" class="fa-solid fa-eye text-xs"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4. Tombol 'Masuk ke Sistem' -->
+          <div class="pt-2">
+            <button 
+              id="loginSubmitBtn" 
+              type="submit" 
+              class="w-full py-3 px-4 bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white text-xs font-bold rounded-xl shadow-lg shadow-sky-600/30 flex items-center justify-center gap-2 transition duration-200 active:scale-[0.99] cursor-pointer"
+            >
+              <i class="fa-solid fa-right-to-bracket text-sm"></i>
+              <span>Masuk ke Sistem</span>
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="mt-4 text-center text-[11px] text-slate-400">
+        &copy; 2026 POS & Akuntansi Toko &bull; Keamanan RBAC & Enkripsi Kredensial MySQL
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= MAIN APPLICATION DASHBOARD ================= -->
+  <div id="appLayout" class="hidden min-h-screen flex flex-col">
+
+    <!-- ================= TOPBAR HEADER ================= -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        
+        <!-- Logo & Branding -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white shadow-md">
+            <i class="fa-solid fa-cash-register text-lg"></i>
+          </div>
+          <div>
+            <div class="font-bold text-slate-900 text-lg leading-tight flex items-center gap-2">
+              POS & AKUNTANSI TOKO
+              <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-200">v1.0 RBAC</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Role-Based Access Control, Transaksi, Inventori & Akuntansi</p>
+          </div>
+        </div>
+
+        <!-- User Info & Logout Button -->
+        <div id="userHeaderSection" class="flex items-center space-x-3">
+          <div class="text-right">
+            <div id="headerUserName" class="text-sm font-bold text-slate-900">Memuat...</div>
+            <div class="flex items-center justify-end">
+              <span id="headerUserRoleBadge" class="text-xs px-2 py-0.5 rounded-md font-semibold">Role</span>
+            </div>
+          </div>
+
+          <!-- Tombol Logout Formal -->
+          <button 
+            id="logoutBtn"
+            onclick="handleLogout()" 
+            title="Keluar dari Sistem (Logout)" 
+            class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 text-slate-600 font-semibold text-xs transition shadow-sm cursor-pointer"
+          >
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span class="hidden sm:inline">Logout</span>
+          </button>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- ================= MAIN LAYOUT (SIDEBAR + CONTENT) ================= -->
+    <div class="flex-1 flex max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 gap-6">
+
+      <!-- ================= SIDEBAR MENU (RBAC DYNAMIC) ================= -->
+      <aside class="w-64 flex-shrink-0">
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm sticky top-24">
+          
+          <!-- Role Info Header -->
+          <div class="pb-3 border-b border-slate-100 mb-3">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Akses Pengguna (RBAC)</div>
+            <div id="sidebarRoleTitle" class="text-sm font-bold text-slate-800 flex items-center gap-2">
+              <!-- Diset oleh JS -->
+            </div>
+            <p id="sidebarRoleDesc" class="text-xs text-slate-500 mt-1 leading-relaxed">
+              <!-- Diset oleh JS -->
+            </p>
+          </div>
+
+          <!-- Dynamic Menu List -->
+          <nav id="sidebarMenuNav" class="space-y-1">
+            <!-- Item menu di-generate secara dinamis oleh JavaScript berdasarkan role -->
+          </nav>
+
+          <!-- System Status Footer -->
+          <div class="mt-6 pt-3 border-t border-slate-100 text-xs text-slate-400 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> MySQL Laragon Online
+            </span>
+            <span class="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">MySQL 8.4</span>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- ================= MAIN CONTENT VIEWPORT ================= -->
+      <main class="flex-1 min-w-0">
+        
+        <!-- Banner Integrasi RBAC & Alur Sistem Menyapa Pengguna Secara Dinamis -->
+        <div id="roleWelcomeBanner" class="mb-5 bg-gradient-to-r from-slate-900 to-sky-950 text-white rounded-2xl p-5 shadow-sm border border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 text-sky-400 font-semibold text-xs tracking-wider uppercase mb-1">
+              <i class="fa-solid fa-shield-halved"></i> Role-Based Access Control Aktif
+            </div>
+            <h1 class="text-xl font-extrabold text-white flex items-center gap-2">
+              <span>Selamat Datang,</span>
+              <span id="bannerUserName" class="text-sky-300 font-black">Pengguna</span>!
+            </h1>
+            <p id="viewSubtitle" class="text-xs text-slate-300 mt-1">
+              Modul Aktif: <strong id="viewTitle" class="text-white font-semibold">Dasbor</strong> &bull; Hak akses disesuaikan untuk peran <span id="bannerUserRole" class="font-bold text-sky-300"></span>.
+            </p>
+          </div>
+          <div id="bannerRoleBadgeContainer">
+            <!-- Badge Role Dinamis -->
+          </div>
+        </div>
+
+        <!-- DYNAMIC CONTENT CONTAINER -->
+        <div id="dynamicContentContainer" class="space-y-6">
+          <!-- Rendered by JavaScript according to active menu -->
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- ================= MODAL STRUK CETAK ================= -->
+  <div id="receiptModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
+      <div class="p-4 bg-slate-100 border-b border-slate-200 flex items-center justify-between">
+        <div class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-receipt text-sky-600"></i> Struk Belanja Kasir
+        </div>
+        <button onclick="closeReceiptModal()" class="text-slate-400 hover:text-slate-700">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div id="receiptContent" class="p-6 receipt-paper text-slate-800 text-xs">
+        <!-- Rendered via JS -->
+      </div>
+      <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end gap-2">
+        <button onclick="window.print()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold rounded-lg flex items-center gap-2">
+          <i class="fa-solid fa-print"></i> Cetak Dokumen
+        </button>
+        <button onclick="closeReceiptModal()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-bold rounded-lg">
+          Selesai
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= MODAL TAMBAH PRODUK ================= -->
+  <div id="productModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
+      <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-box text-sky-600"></i> Tambah Produk Baru
+        </div>
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-700">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <form onsubmit="handleCreateProduct(event)" class="p-6 space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">SKU Produk *</label>
+            <input id="prodSku" type="text" placeholder="Contoh: MNM-099" required class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Barcode</label>
+            <input id="prodBarcode" type="text" placeholder="Scan barcode..." class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Produk *</label>
+          <input id="prodName" type="text" placeholder="Nama lengkap produk..." required class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500">
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Satuan</label>
+            <input id="prodUnit" type="text" value="pcs" required class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Harga Beli (Rp) *</label>
+            <input id="prodBuyPrice" type="number" placeholder="0" required class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Harga Jual (Rp) *</label>
+            <input id="prodSellPrice" type="number" placeholder="0" required class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500">
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Stok Awal</label>
+            <input id="prodInitStock" type="number" value="10" class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Min. Stok Peringatan</label>
+            <input id="prodMinStock" type="number" value="5" class="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-sky-500">
+          </div>
+        </div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-50">Batal</button>
+          <button type="submit" class="px-4 py-2 bg-sky-600 text-white rounded-lg text-xs font-bold hover:bg-sky-700">Simpan Produk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= MODAL TAMBAH & EDIT PENGGUNA ================= -->
+  <div id="userModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden animate-fade-in">
+      <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div class="font-bold text-slate-800 text-sm flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center text-xs">
+            <i class="fa-solid fa-user-gear"></i>
+          </div>
+          <span id="userModalTitle">Tambah Pengguna Staf Baru (RBAC)</span>
+        </div>
+        <button type="button" onclick="closeUserModal()" class="text-slate-400 hover:text-slate-700 p-1">
+          <i class="fa-solid fa-xmark text-base"></i>
+        </button>
+      </div>
+      <form onsubmit="handleUserFormSubmit(event)" class="p-6 space-y-3.5 text-xs">
+        <input type="hidden" id="editUserId" value="">
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">Nama Lengkap Pegawai *</label>
+          <input id="newUserName" type="text" placeholder="Contoh: Siti Aisyah, Ahmad Fauzi..." required class="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Username Unik *</label>
+            <input id="newUserUsername" type="text" placeholder="contoh: siti_kasir" required class="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Email *</label>
+            <input id="newUserEmail" type="email" placeholder="siti@toko.com" required class="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Peran / Role Operasional *</label>
+            <select id="newUserRole" required class="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold text-slate-800 focus:ring-2 focus:ring-sky-500 focus:outline-none cursor-pointer">
+              <option value="Kasir" selected>🛒 Kasir</option>
+              <option value="Kepala Gudang">📦 Kepala Gudang</option>
+              <option value="Akunting">📊 Akunting</option>
+              <option value="Bagian Keuangan">💳 Bagian Keuangan</option>
+              <option value="Kepala Toko">🏬 Kepala Toko</option>
+              <option value="Sales">💼 Sales</option>
+              <option value="Owner">👑 Owner (Pemilik Toko)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">No. Telepon / WhatsApp</label>
+            <input id="newUserPhone" type="text" placeholder="08123456789" class="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1" id="userPasswordLabel">Kata Sandi (Password) *</label>
+          <input id="newUserPassword" type="password" placeholder="Minimal 6 karakter..." required class="w-full text-xs px-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-sky-500 focus:outline-none">
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeUserModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-50">Batal</button>
+          <button type="submit" id="userModalSubmitBtn" class="px-5 py-2 btn-primary-gradient text-white rounded-xl text-xs font-bold shadow-md">Simpan Staf Pengguna</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= TOAST NOTIFICATION ================= -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-xl flex items-center space-x-3 text-xs font-medium">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400 text-base"></i>
+    <span id="toastMsg">Notifikasi</span>
+  </div>
+
+  <!-- App Script -->
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  --primary: #0284c7;
+  --primary-dark: #0369a1;
+  --secondary: #0ea5e9;
+  --surface: #ffffff;
+  --background: #f8fafc;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--background);
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Glass & Card styles */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.receipt-paper {
+  font-family: 'Courier New', Courier, monospace;
+  background: #fffdf5;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.badge-role-owner { background-color: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.badge-role-kepala-toko { background-color: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+.badge-role-keuangan { background-color: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+.badge-role-akunting { background-color: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+.badge-role-gudang { background-color: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+.badge-role-kasir { background-color: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+.badge-role-sales { background-color: #ffe4e6; color: #be123c; border: 1px solid #fecdd3; }
+
+.table-header-custom {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.btn-primary-gradient {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  transition: all 0.2s ease;
+}
+.btn-primary-gradient:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+/* Print media styles: Struk kasir thermal 80mm & Dokumen Laporan Resmi */
+@media print {
+  /* Jika Modal Struk sedang terbuka, cetak struk */
+  body:has(#receiptModal:not(.hidden)) * {
+    visibility: hidden;
+  }
+  body:has(#receiptModal:not(.hidden)) #receiptModal,
+  body:has(#receiptModal:not(.hidden)) #receiptModal * {
+    visibility: visible;
+  }
+  body:has(#receiptModal:not(.hidden)) #receiptModal {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    background: transparent !important;
+    display: block !important;
+    padding: 0 !important;
+  }
+  body:has(#receiptModal:not(.hidden)) #receiptModal > div {
+    max-width: 80mm !important;
+    width: 80mm !important;
+    margin: 0 auto !important;
+    box-shadow: none !important;
+    border: 1px dashed #cbd5e1 !important;
+  }
+  body:has(#receiptModal:not(.hidden)) #receiptModal .border-b,
+  body:has(#receiptModal:not(.hidden)) #receiptModal .border-t,
+  body:has(#receiptModal:not(.hidden)) #receiptModal button {
+    display: none !important;
+  }
+
+  /* Jika Modal Struk tersembunyi, cetak dokumen laporan di main viewport */
+  header, aside, #roleWelcomeBanner, button, .no-print {
+    display: none !important;
+  }
+  #appLayout, main, #dynamicContentContainer {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+  }
+  .printable-report {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+}

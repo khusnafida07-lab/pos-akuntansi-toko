@@ -1,0 +1,32 @@
+{
+  "name": "pos-akuntansi-toko",
+  "version": "1.0.0",
+  "description": "Sistem POS & Akuntansi Toko Terintegrasi dengan Role-Based Access Control (RBAC)",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "seed": "node src/database/init-db.js",
+    "test": "node tests/rbac.test.js",
+    "test:phase2": "node tests/phase2.test.js",
+    "test:all": "node tests/rbac.test.js && node tests/phase2.test.js"
+  },
+  "keywords": [
+    "pos",
+    "akuntansi",
+    "accounting",
+    "inventory",
+    "rbac",
+    "sqlite",
+    "mysql"
+  ],
+  "author": "Kelompok Sistem POS & Akuntansi",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.7",
+    "express": "^5.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.24.5"
+  }
+}
